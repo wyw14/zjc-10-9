@@ -62,10 +62,10 @@
     }
   ],
   "currentQuestion": {
-    "questionId": 1,
-    "question": "如果你能拥有一项超能力，你会选择什么？为什么？",
-    "date": "2026-06-14",
-    "timestamp": 1781366400000
+    "questionId": 2,
+    "question": "描述一个你最近学到的新技能，它如何改变了你的生活？",
+    "date": "2026-06-15",
+    "timestamp": 1781452800000
   },
   "answers": {
     "2026-06-10": {
@@ -73,35 +73,59 @@
       "question": "你最敬佩的人是谁？他/她教会了你什么？",
       "answer": "我最敬佩的是我的父亲。他教会我坚持和责任感，无论遇到什么困难都不放弃。",
       "answered": true,
-      "answeredAt": "2026-06-10T08:15:00.000Z"
+      "answeredAt": "2026-06-10T08:15:00.000Z",
+      "tags": [
+        "家人",
+        "成长",
+        "感恩"
+      ]
     },
     "2026-06-11": {
       "questionId": 5,
       "question": "描述一次你克服困难的经历，你从中学到了什么？",
       "answer": "",
       "answered": false,
-      "answeredAt": null
+      "answeredAt": null,
+      "tags": []
     },
     "2026-06-12": {
       "questionId": 6,
       "question": "如果给你100万无条件使用，你会如何分配？",
       "answer": "50万存起来做应急基金，30万投资学习和提升自己，15万给家人，5万做慈善。",
       "answered": true,
-      "answeredAt": "2026-06-12T20:30:00.000Z"
+      "answeredAt": "2026-06-12T20:30:00.000Z",
+      "tags": [
+        "理财",
+        "成长",
+        "感恩"
+      ]
     },
     "2026-06-13": {
       "questionId": 7,
       "question": "你认为人生中最重要的三件事是什么？请排序并说明理由。",
       "answer": "",
       "answered": false,
-      "answeredAt": null
+      "answeredAt": null,
+      "tags": []
     },
     "2026-06-14": {
       "questionId": 1,
       "question": "如果你能拥有一项超能力，你会选择什么？为什么？",
       "answer": "我想拥有飞行的能力，因为可以自由地去任何地方，不用被交通限制。",
       "answered": true,
-      "answeredAt": "2026-06-14T00:30:22.110Z"
+      "answeredAt": "2026-06-14T00:30:22.110Z",
+      "tags": [
+        "想象",
+        "自由"
+      ]
+    },
+    "2026-06-15": {
+      "questionId": 2,
+      "question": "描述一个你最近学到的新技能，它如何改变了你的生活？",
+      "answer": "",
+      "answered": false,
+      "answeredAt": null,
+      "tags": []
     }
   }
 }

@@ -75,7 +75,8 @@ function selectQuestionForToday(data) {
       question: selected.question,
       answer: '',
       answered: false,
-      answeredAt: null
+      answeredAt: null,
+      tags: []
     };
   }
 
@@ -94,7 +95,8 @@ function ensureTodayQuestion(data) {
       question: data.currentQuestion.question,
       answer: '',
       answered: false,
-      answeredAt: null
+      answeredAt: null,
+      tags: []
     };
     writeData(data);
   }
@@ -106,38 +108,42 @@ app.get('/api/today', (req, res) => {
     const data = readData();
     const question = ensureTodayQuestion(data);
     const todayStr = getDateString();
-    const todayAnswer = data.answers[todayStr] || { answer: '', answered: false };
+    const todayAnswer = data.answers[todayStr] || { answer: '', answered: false, tags: [] };
     res.json({
       success: true,
       data: {
         question: question,
         answer: todayAnswer.answer,
         answered: todayAnswer.answered,
+        tags: todayAnswer.tags || [],
         date: todayStr
       }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
 app.post('/api/answer', (req, res) => {
   try {
-    const { answer } = req.body;
+    const { answer, tags } = req.body;
     if (typeof answer !== 'string') {
       return res.status(400).json({ success: false, message: '回答内容无效' });
     }
     const data = readData();
     ensureTodayQuestion(data);
     const todayStr = getDateString();
+    const existingTags = data.answers[todayStr]?.tags || [];
+    const finalTags = Array.isArray(tags) ? tags : existingTags;
 
     data.answers[todayStr] = {
       questionId: data.currentQuestion.questionId,
       question: data.currentQuestion.question,
       answer: answer,
       answered: answer.trim().length > 0,
-      answeredAt: answer.trim().length > 0 ? new Date().toISOString() : null
+      answeredAt: answer.trim().length > 0 ? new Date().toISOString() : null,
+      tags: finalTags
     };
 
     writeData(data);
@@ -146,12 +152,13 @@ app.post('/api/answer', (req, res) => {
       data: {
         date: todayStr,
         answered: data.answers[todayStr].answered,
-        answeredAt: data.answers[todayStr].answeredAt
+        answeredAt: data.answers[todayStr].answeredAt,
+        tags: finalTags
       }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -164,6 +171,22 @@ app.get('/api/history', (req, res) => {
 
     const daysInMonth = new Date(y, m, 0).getDate();
     const calendar = [];
+    const tagCounts = {};
+
+    Object.values(data.answers).forEach(entry => {
+      if (entry && entry.tags && Array.isArray(entry.tags)) {
+        entry.tags.forEach(tag => {
+          if (tag && tag.trim()) {
+            const t = tag.trim();
+            tagCounts[t] = (tagCounts[t] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const tagsWithCount = Object.entries(tagCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -174,7 +197,8 @@ app.get('/api/history', (req, res) => {
         hasQuestion: !!entry,
         answered: !!(entry && entry.answered),
         answer: entry ? entry.answer : '',
-        question: entry ? entry.question : ''
+        question: entry ? entry.question : '',
+        tags: entry ? (entry.tags || []) : []
       });
     }
 
@@ -211,12 +235,13 @@ app.get('/api/history', (req, res) => {
           missedCount,
           totalDays: answeredCount + missedCount
         },
+        tags: tagsWithCount,
         allAnswers: data.answers
       }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -229,13 +254,13 @@ app.get('/api/question-bank', (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: '服务器错�? });
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`每日问答后端服务已启�? http://localhost:${PORT}`);
+  console.log(`每日问答后端服务已启动: http://localhost:${PORT}`);
   const data = readData();
   ensureTodayQuestion(data);
-  console.log(`今日问题已准备就�? ${data.currentQuestion.question}`);
+  console.log(`今日问题已准备就绪: ${data.currentQuestion.question}`);
 });

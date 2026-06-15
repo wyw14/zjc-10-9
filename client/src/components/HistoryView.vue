@@ -17,6 +17,31 @@
       </div>
     </div>
 
+    <div v-if="history && history.tags && history.tags.length > 0" class="tags-panel">
+      <div class="tags-panel-header">
+        <h4>🏷️ 标签统计</h4>
+        <span
+          v-if="activeFilterTag"
+          class="filter-active-hint"
+        >
+          正在过滤：<strong>{{ activeFilterTag }}</strong>
+          <button class="clear-filter-btn" @click="clearFilter">× 清除</button>
+        </span>
+      </div>
+      <div class="tags-cloud">
+        <button
+          v-for="tag in history.tags"
+          :key="tag.name"
+          class="tag-filter-btn"
+          :class="{ active: activeFilterTag === tag.name }"
+          @click="toggleFilter(tag.name)"
+        >
+          <span class="tag-name">{{ tag.name }}</span>
+          <span class="tag-count-badge">{{ tag.count }}</span>
+        </button>
+      </div>
+    </div>
+
     <div class="calendar-header">
       <button class="nav-btn" @click="$emit('prev-month')">← 上月</button>
       <div class="calendar-title">
@@ -35,6 +60,7 @@
         @click="selectDay(day)"
       >
         <span v-if="day" class="day-num">{{ day.day }}</span>
+        <span v-if="day && day.tags && day.tags.length > 0" class="day-tag-indicator"></span>
       </div>
     </div>
 
@@ -55,6 +81,10 @@
         <div class="legend-box empty-day"></div>
         <span>无记录</span>
       </div>
+      <div class="legend-item">
+        <div class="legend-box tagged"></div>
+        <span>有标签</span>
+      </div>
     </div>
 
     <div v-if="selectedDay" class="day-detail">
@@ -63,6 +93,12 @@
         <p class="q-text">❓ {{ selectedDay.question }}</p>
         <div v-if="selectedDay.answered && selectedDay.answer">
           <p class="a-text">{{ selectedDay.answer }}</p>
+          <div v-if="selectedDay.tags && selectedDay.tags.length > 0" class="detail-tags">
+            <span class="detail-tags-label">标签：</span>
+            <span v-for="(tag, idx) in selectedDay.tags" :key="idx" class="tag-chip readonly">
+              {{ tag }}
+            </span>
+          </div>
         </div>
         <div v-else class="empty-note">这一天没有回答</div>
       </div>
@@ -85,11 +121,24 @@ defineEmits(['prev-month', 'next-month'])
 
 const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 const selectedDay = ref(null)
+const activeFilterTag = ref(null)
+
+const filteredCalendar = computed(() => {
+  if (!props.history?.calendar) return []
+  if (!activeFilterTag.value) return props.history.calendar
+  return props.history.calendar.map(day => {
+    if (!day) return day
+    const hasTag = day.tags && day.tags.includes(activeFilterTag.value)
+    return {
+      ...day,
+      _filteredOut: !hasTag
+    }
+  })
+})
 
 const fullCalendar = computed(() => {
-  if (!props.history?.calendar) return []
-  const cal = [...props.history.calendar]
-  const firstDay = cal[0]
+  const cal = [...filteredCalendar.value]
+  const firstDay = cal.find(d => d)
   if (!firstDay) return cal
   const d = new Date(firstDay.date)
   const firstWeekday = d.getDay()
@@ -115,6 +164,9 @@ function getDayClass(day) {
   if (!day) return 'empty'
   const classes = []
   const todayStr = getTodayStr()
+  if (day._filteredOut) {
+    classes.push('filtered-out')
+  }
   if (day.date === todayStr) {
     classes.push('today')
   }
@@ -134,6 +186,19 @@ function selectDay(day) {
   } else {
     selectedDay.value = null
   }
+}
+
+function toggleFilter(tagName) {
+  if (activeFilterTag.value === tagName) {
+    activeFilterTag.value = null
+  } else {
+    activeFilterTag.value = tagName
+  }
+  selectedDay.value = null
+}
+
+function clearFilter() {
+  activeFilterTag.value = null
 }
 
 function formatFullDate(dateStr) {
