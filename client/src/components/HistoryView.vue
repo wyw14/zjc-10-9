@@ -181,7 +181,7 @@ function getDayClass(day) {
 }
 
 function selectDay(day) {
-  if (day && day.hasQuestion) {
+  if (day && day.hasQuestion && !day._filteredOut) {
     selectedDay.value = day
   } else {
     selectedDay.value = null

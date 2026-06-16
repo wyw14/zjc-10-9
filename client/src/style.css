@@ -693,12 +693,17 @@ body {
 }
 
 .calendar-day.filtered-out {
-  opacity: 0.25;
-  filter: grayscale(0.5);
+  opacity: 0.2;
+  filter: grayscale(0.7);
+  cursor: not-allowed;
 }
 
 .calendar-day.filtered-out:hover {
   transform: none;
+}
+
+.calendar-day.filtered-out .day-tag-indicator {
+  opacity: 0.5;
 }
 
 .legend-box.tagged {
